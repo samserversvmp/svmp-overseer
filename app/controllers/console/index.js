@@ -20,7 +20,7 @@
 
 var
     passport = require('passport'),
-    svmp = require('../../../lib/svmp'),
+    sam = require('../../../lib/sam'),
     lodash = require('lodash'),
     mail = require('../../../lib/mail');
 
@@ -59,7 +59,7 @@ exports.index = function (req, res) {
 
 
 exports.listSupportedDevices = function (req, res) {
-    var o = lodash.map(svmp.config.get("new_vm_defaults:images"), function (v, k) {
+    var o = lodash.map(sam.config.get("new_vm_defaults:images"), function (v, k) {
         return {name: k, id: v}
     });
     res.jsonp(200, o);
@@ -76,7 +76,7 @@ exports.signup = function (req, res) {
         res.send(400);
     } else {
         // Init Variables
-        var user = new svmp.User(req.body);
+        var user = new sam.User(req.body);
         // Then save the user
         user.save(function (err) {
             if (err) {
@@ -106,7 +106,7 @@ exports.signup = function (req, res) {
  */
 exports.signin = function (req, res, next) {
     // check to see if this user account is currently locked
-    var error = svmp.lockout.checkForLock(req.body.username);
+    var error = sam.lockout.checkForLock(req.body.username);
     if (error) {
         res.json(401,{message: error});
         return;
@@ -118,7 +118,7 @@ exports.signin = function (req, res, next) {
         } else if (!user) {
             // failed authentication
             res.send(401, info); // info is something like {message: "Invalid password"}
-            svmp.lockout.failedAttempt(req.body.username);
+            sam.lockout.failedAttempt(req.body.username);
         } else {
             // Remove sensitive data before login
             user.password = undefined;
@@ -127,7 +127,7 @@ exports.signin = function (req, res, next) {
             req.login(user, function (err) {
                 if (err) {
                     res.send(401, {message: error});
-                    svmp.lockout.failedAttempt(req.body.username);
+                    sam.lockout.failedAttempt(req.body.username);
                 } else {
                     res.jsonp(user);
                 }
@@ -153,7 +153,7 @@ exports.changePassword = function (req, res, next) {
     var message = null;
 
     if (req.user) {
-        svmp.User.findById(req.user.id, function (err, user) {
+        sam.User.findById(req.user.id, function (err, user) {
             if (!err && user) {
                 if (user.authenticate(passwordDetails.currentPassword)) {
                     if (passwordDetails.newPassword === passwordDetails.verifyPassword) {
@@ -202,7 +202,7 @@ exports.changePassword = function (req, res, next) {
 exports.list = function (req, res) {
     var approvedFlag = req.query.approved === 'true';
 
-    svmp.User.find({approved: approvedFlag})
+    sam.User.find({approved: approvedFlag})
         .sort('-created')
         .select('username email created approved roles device_type volume_id')
         .exec(function (err, results) {
@@ -220,7 +220,7 @@ exports.read = function (req, res) {
     var userid = req.params.uid;
     var message = null;
 
-    svmp.User.findById(userid, function (err, user) {
+    sam.User.findById(userid, function (err, user) {
         if (err) {
             return res.send(400, {
                 message: getErrorMessage(err)
@@ -237,7 +237,7 @@ exports.update = function (req, res) {
     var email = req.query.email === 'true';
     var message = null;
 
-    svmp.User.findById(userId, function (err, user) {
+    sam.User.findById(userId, function (err, user) {
         if (err) {
             return res.send(400, {
                 message: getErrorMessage(err)
@@ -264,7 +264,7 @@ exports.update = function (req, res) {
 exports.deleteUser = function (req, res) {
     var userId = req.params.uid;
     var message = null;
-    svmp.User.remove({ _id: userId}, function (err, r) {
+    sam.User.remove({ _id: userId}, function (err, r) {
         if (err) {
             return res.send(400, {
                 message: getErrorMessage(err)
@@ -287,14 +287,14 @@ exports.deleteUser = function (req, res) {
  */
 exports.createVolume = function (req, res) {
     var user_id = req.body.uid;
-    svmp.User.findById(user_id, function (err, user) {
+    sam.User.findById(user_id, function (err, user) {
         if (err) {
             res.logMessage = err;
             return res.send(400, {
                 message: getErrorMessage(err)
             });
         } else {
-            svmp.cloud.createVolumeForUser(user)
+            sam.cloud.createVolumeForUser(user)
                 .then(function (vol) {
                     // Send back info to browser to update UI
                     res.jsonp({user: user._id, volid: user.volume_id});
@@ -313,9 +313,9 @@ exports.createVolume = function (req, res) {
 // [{name:'', status: '', id: ''}
 exports.listVolumes = function (req, res) {
     var results = [];
-    svmp.cloud.getVolumes(function (err, r) {
+    sam.cloud.getVolumes(function (err, r) {
         if (err) {
-            svmp.logger.error("listVolumes failed:", err);
+            sam.logger.error("listVolumes failed:", err);
             res.json(500, {msg: "Problem listing volumes"});
         } else {
             res.json(200, r);
@@ -327,12 +327,12 @@ exports.listVolumes = function (req, res) {
 // [{name:'', _id: ''}
 exports.listImagesDevices = function (req, res) {
     var result = {images: [], devices: []};
-    svmp.cloud.getImages(function (err, r) {
+    sam.cloud.getImages(function (err, r) {
         if (err) {
-            svmp.logger.error("listImages failed to get images:", err);
+            sam.logger.error("listImages failed to get images:", err);
             res.json(500, {msg: "Error listing Cloud Images"});
         } else {
-            var o = lodash.map(svmp.config.get("new_vm_defaults:images"), function (v, k) {
+            var o = lodash.map(sam.config.get("new_vm_defaults:images"), function (v, k) {
                     return {name: k, id: v}
             });
             result.images = r;
@@ -346,25 +346,25 @@ exports.listImagesDevices = function (req, res) {
 // Post with Username.  Creates VM. Should update UI with VM ID and IP
 /*exports.startVM = function(req,res) {
     if(un) {
-        svmp.User.findUserWithPromise({username: un})
+        sam.User.findUserWithPromise({username: un})
             .then(function (userObj) {
                 // before we proceed, validate some user properties first
-                if (svmp.config.get('new_vm_defaults:images')[userObj.device_type] === undefined)
+                if (sam.config.get('new_vm_defaults:images')[userObj.device_type] === undefined)
                     throw new Error("User '" + userObj.username + "' has an unknown device type '" + userObj.device_type + "'");
                 else if (userObj.volume_id === '')
                     throw new Error("User '" + userObj.username + "' does not have a Volume ID");
                 return userObj;
-            }).then(svmp.cloud.setUpUser)
+            }).then(sam.cloud.setUpUser)
             .then(function (userObj) {
-                //userObj.vm_port = svmp.config.get('vm_port');
+                //userObj.vm_port = sam.config.get('vm_port');
                 // for some reason, setting a property on userObj doesn't stick - make a new object instead
                 var obj = {
                     'vm_ip': userObj.vm_ip,
-                    'vm_port': svmp.config.get('vm_port')
+                    'vm_port': sam.config.get('vm_port')
                 };
                 res.json(200, obj);
             }).catch(function (err) {
-                svmp.logger.error("setUpVm failed:", err);
+                sam.logger.error("setUpVm failed:", err);
                 res.send(500);
             }).done();
     }

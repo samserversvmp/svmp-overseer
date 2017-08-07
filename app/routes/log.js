@@ -1,27 +1,8 @@
-/*
- * Copyright 2014 The MITRE Corporation, All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this work except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * author Joe Portner
- *
- */
-
 'use strict';
 
 var
     fs = require('fs'),
-    svmp = require('../../lib/svmp'),
+    sam = require('../../lib/sam'),
     jwt = require('jsonwebtoken');
 
 // do NOT read this directly, use the getter methods
@@ -39,15 +20,15 @@ var pubKey = null;
  * @param app
  */
 module.exports = function (app) {
-    var logLevel = svmp.config.get('log_level');
+    var logLevel = sam.config.get('log_level');
 
     app.use(function (req, res, next) {
         // intercept the response before it gets sent
-        var token = req.get('svmp-authtoken');
+        var token = req.get('sam-authtoken');
         if (token) {
             var send = res.send;
             res.send = function (string, m) {
-                var token = req.get('svmp-authtoken');
+                var token = req.get('sam-authtoken');
                 // 'this' is the response
 
                 if (logLevel === 'debug' || logLevel === 'silly') {
@@ -56,7 +37,7 @@ module.exports = function (app) {
                     // not every API call will contain a JWT; if it does (for admin APIs), pull the username out of it
                     var reqUser = decoded.sub + "@";
                     // debug: log the request address/method/URL and response status code
-                    svmp.logger.debug("Request (%s%s) %s '%s'; Response code: %d",
+                    sam.logger.debug("Request (%s%s) %s '%s'; Response code: %d",
                         reqUser, req.connection.remoteAddress, req.method, req.originalUrl, that.statusCode);
                 }
                 if (logLevel === 'silly') {
@@ -64,7 +45,7 @@ module.exports = function (app) {
                     var reqJWT = JSON.stringify(decoded);
                     var resJSON = JSON.parse(string);
                     // silly: log the JWT/body and response body
-                    svmp.logger.silly("  Request JWT: '%s', JSON: %s; Response JSON: %s",
+                    sam.logger.silly("  Request JWT: '%s', JSON: %s; Response JSON: %s",
                         reqJWT, JSON.stringify(req.body, stringifyFilter), JSON.stringify(resJSON, stringifyFilter));
                 }
                 // we're done logging, finish sending the response
@@ -74,7 +55,7 @@ module.exports = function (app) {
 
         /*var send = res.send;
          res.send = function (string, m) {
-         var token = req.get('svmp-authtoken');
+         var token = req.get('sam-authtoken');
          // 'this' is the response
 
          if ((logLevel === 'debug' || logLevel === 'silly') && token) {
@@ -89,7 +70,7 @@ module.exports = function (app) {
          var reqUser = decoded.sub + "@";
 
          // debug: log the request address/method/URL and response status code
-         svmp.logger.debug("Request (%s%s) %s '%s'; Response code: %d",
+         sam.logger.debug("Request (%s%s) %s '%s'; Response code: %d",
          reqUser, req.connection.remoteAddress, req.method, req.originalUrl, that.statusCode);
          }
          if (logLevel === 'silly' && token) {
@@ -97,7 +78,7 @@ module.exports = function (app) {
          var reqJWT = JSON.stringify(decoded);
          var resJSON = JSON.parse(string);
          // silly: log the JWT/body and response body
-         svmp.logger.silly("  Request JWT: '%s', JSON: %s; Response JSON: %s",
+         sam.logger.silly("  Request JWT: '%s', JSON: %s; Response JSON: %s",
          reqJWT, JSON.stringify(req.body, stringifyFilter), JSON.stringify(resJSON, stringifyFilter));
          }
          // we're done logging, finish sending the response
@@ -143,7 +124,7 @@ function shortJWT(token) {
 // load it from disk if not already in memory
 function getPubKey() {
     if (pubKey === null) {
-        pubKey = fs.readFileSync(svmp.config.get('server_certificate'));
+        pubKey = fs.readFileSync(sam.config.get('server_certificate'));
     }
     return pubKey;
 }

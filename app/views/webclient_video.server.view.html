@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>SVMP HTML5 Client</title>
+    <title>sam HTML5 Client</title>
     <link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.css">
     <link rel="stylesheet" href="/css/webclient.css"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
@@ -47,19 +47,19 @@
 
     // check to make sure we have a session cookie
     $.cookie.json = true;
-    window.svmpData = $.cookie("svmpData");
-    if (!window.svmpData) {
+    window.samData = $.cookie("samData");
+    if (!window.samData) {
         alert("No session data found, please log in first.");
         window.location.replace("/webclient-login");
     }
-    window.svmpState = "auth"; // state 1: authenticated
-    console.log('SVMP state: "auth"');
+    window.samState = "auth"; // state 1: authenticated
+    console.log('sam state: "auth"');
 
     // logout button
     $("#logoutButton").click(function() {
         var result = confirm("Are you sure you want to log out and close your connection?");
         if (result) {
-            $.removeCookie("svmpData", {path: '/'});
+            $.removeCookie("samData", {path: '/'});
             window.location.replace("/webclient");
         }
     });
@@ -69,33 +69,33 @@
     var protocol = "ws";
     if (window.location.protocol === "https:")
         protocol = "wss";
-    var url = protocol + "://" + window.svmpData.server.host + ":" + window.svmpData.server.port;
-    var ws = new WebSocket(url, window.svmpData.sessionInfo.token);
+    var url = protocol + "://" + window.samData.server.host + ":" + window.samData.server.port;
+    var ws = new WebSocket(url, window.samData.sessionInfo.token);
     ws.binaryType = "arraybuffer";
     var ProtoBuf = dcodeIO.ProtoBuf;
-    var builder = ProtoBuf.loadProtoFile("/data/svmp.proto");
-    var svmp = builder.build("svmp");
+    var builder = ProtoBuf.loadProtoFile("/data/sam.proto");
+    var sam = builder.build("sam");
 
     ws.onopen = function() {
         console.log("ws opened");
-        window.svmpState = "connected"; // state 2: connected to the WebSocket
-        console.log('SVMP state: "auth" -> "connected"');
+        window.samState = "connected"; // state 2: connected to the WebSocket
+        console.log('sam state: "auth" -> "connected"');
     };
 
     ws.onmessage = function(ev) {
-        var resBuilder = builder.build("svmp.Response");
+        var resBuilder = builder.build("sam.Response");
         var res = resBuilder.decode(ev.data);
-        handleResponse(res, ws, svmp);
+        handleResponse(res, ws, sam);
     };
 
     ws.onclose = function(ev) {
         var msg = "Socket has been closed, code: " + ev.code;
 
         // no error messages are generated in "onerror", we have to guess...
-        if (ev.code === 1006 && protocol === "wss" && window.svmpState === "auth") {
+        if (ev.code === 1006 && protocol === "wss" && window.samState === "auth") {
             msg += "\n"
                     + "(If you're using a self-signed certificate, navigate to '"
-                    + "https://" + window.svmpData.server.host + ":" + window.svmpData.server.port
+                    + "https://" + window.samData.server.host + ":" + window.samData.server.port
                     + "' in a new tab, accept the certificate, and try again)";
         }
 
@@ -133,14 +133,14 @@
     }, 0);
 
     //Capture touch events
-    canvas.addEventListener("touchstart", function(ev) { handleTouchStart(ev, ws, svmp) }, false);
-    canvas.addEventListener("touchend", function(ev) { handleTouchEnd(ev, ws, svmp) }, false);
-    canvas.addEventListener("touchmove", function(ev) { handleTouchMove(ev, ws, svmp) }, false);
+    canvas.addEventListener("touchstart", function(ev) { handleTouchStart(ev, ws, sam) }, false);
+    canvas.addEventListener("touchend", function(ev) { handleTouchEnd(ev, ws, sam) }, false);
+    canvas.addEventListener("touchmove", function(ev) { handleTouchMove(ev, ws, sam) }, false);
     //Capture mouse events
-    canvas.addEventListener("mousedown", function(ev) { handleMouseStart(ev, ws, svmp) }, false);
-    canvas.addEventListener("mouseup", function(ev) { handleMouseEnd(ev, ws, svmp) }, false);
-    canvas.addEventListener("mousemove", function(ev) { handleMouseMove(ev, ws, svmp) }, false);
-    canvas.addEventListener("mouseout", function(ev) { handleMouseEnd(ev, ws, svmp) }, false);
+    canvas.addEventListener("mousedown", function(ev) { handleMouseStart(ev, ws, sam) }, false);
+    canvas.addEventListener("mouseup", function(ev) { handleMouseEnd(ev, ws, sam) }, false);
+    canvas.addEventListener("mousemove", function(ev) { handleMouseMove(ev, ws, sam) }, false);
+    canvas.addEventListener("mouseout", function(ev) { handleMouseEnd(ev, ws, sam) }, false);
 
     // set up Android button listeners
     $("#backButton").click(function() {
@@ -153,10 +153,10 @@
         androidButton(187);
     });
     function androidButton(buttonCode) {
-        if (window.svmpState !== "running")
+        if (window.samState !== "running")
             return;
-        var buttonRequest = new svmp.Request({
-            type: svmp.Request.RequestType.KEYEVENT,
+        var buttonRequest = new sam.Request({
+            type: sam.Request.RequestType.KEYEVENT,
             key: {
                 eventTime: {
                     low: 0,

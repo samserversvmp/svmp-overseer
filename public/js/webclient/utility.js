@@ -22,14 +22,14 @@ function submitCredentials(credentials, url, videoUrl) {
         success: function (data, status, jqXHR) {
             // if "remember me" is checked, store a cookie; otherwise delete the cookie
             if ($("#remember").prop("checked")) {
-                $.cookie("svmpRemember", credentials.username, {path: '/'}); // cookie valid across entire site
+                $.cookie("samRemember", credentials.username, {path: '/'}); // cookie valid across entire site
             } else {
-                $.removeCookie("svmpRemember");
+                $.removeCookie("samRemember");
             }
 
             // store a session cookie
             var expires = (data.sessionInfo.maxLength).seconds().fromNow();
-            $.cookie("svmpData", data, {expires: expires, path: '/'}); // expiring cookie, valid across entire site
+            $.cookie("samData", data, {expires: expires, path: '/'}); // expiring cookie, valid across entire site
 
             // forward location to video screen
             window.location.replace(videoUrl);

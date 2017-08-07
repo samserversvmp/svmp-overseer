@@ -1,4 +1,4 @@
-# Example svmp-overseer configuration file
+# Example sam-overseer configuration file
 
 # External TCP port to listen on for client connections.
 # default = 3000
@@ -12,8 +12,8 @@ rest_server_url: 'https://localhost:3000'
 
 # MongoDB database url
 db:
-    production: "mongodb://localhost/svmp_overseer_production_db"
-    test: "mongodb://localhost/svmp_overseer_test_db"
+    production: "mongodb://localhost/sam_overseer_production_db"
+    test: "mongodb://localhost/sam_overseer_test_db"
 
 ################################################################################
 # WebConsole settings
@@ -65,8 +65,8 @@ jwt_signing_alg: "RS512"
 #behind_reverse_proxy: false
 
 # PAM 'service' name to use. I.e., which file under /etc/pam.d/
-# default = 'svmp'
-#pam_service: 'svmp'
+# default = 'sam'
+#pam_service: 'sam'
 
 
 ################################################################################
@@ -88,13 +88,13 @@ vm_idle_ttl: 3600
 vm_check_interval: 300
 
 ################################################################################
-# svmp-server settings
+# sam-server settings
 ################################################################################
 
-# Address of the svmp-server that we tell the client to connect to
-proxy_host: 'svmp-server.example.com'
+# Address of the sam-server that we tell the client to connect to
+proxy_host: 'sam-server.example.com'
 
-# Port the svmp-server listens on
+# Port the sam-server listens on
 proxy_port: 8002
 
 ################################################################################

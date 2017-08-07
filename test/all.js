@@ -20,16 +20,16 @@
 'use strict';
 
 var
-    svmp = require('../lib/svmp');
+    sam = require('../lib/sam');
 
 /** Wrapper for all tests */
 
 beforeEach(function(done){
 
 
-    svmp.User.remove({}, function (err) {
+    sam.User.remove({}, function (err) {
 
-        new svmp.User({
+        new sam.User({
             username: 'dave',
             password: 'dave12345678!A',
             email: 'dave@here.com',
@@ -37,7 +37,7 @@ beforeEach(function(done){
             device_type: 'a_device',
             volume_id: ''
         }).save(function(){
-                new svmp.User({
+                new sam.User({
                     username: 'bob',
                     password: 'bob12345678!A',
                     email: 'bob@here.com',
@@ -51,8 +51,8 @@ beforeEach(function(done){
 
 
         // Add 2 users for testing...
-        /*svmp.users.addUserToDb(goodUser, function() {
-            svmp.users.addUserToDb(passwordChangeNeededUser, function() {
+        /*sam.users.addUserToDb(goodUser, function() {
+            sam.users.addUserToDb(passwordChangeNeededUser, function() {
                 done();
             });
         });*/
@@ -62,13 +62,13 @@ beforeEach(function(done){
 });
 
 before(function (done) {
-    svmp.VMSession.remove({}, function (err) {
+    sam.VMSession.remove({}, function (err) {
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
         done();
     });
 });
 
 after(function (done) {
-    svmp.shutdown();
+    sam.shutdown();
     done();
 });

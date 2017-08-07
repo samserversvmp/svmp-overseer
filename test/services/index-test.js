@@ -20,9 +20,9 @@
 'use strict';
 
 var
-    svmp = require('../../lib/svmp'),
+    sam = require('../../lib/sam'),
     assert = require('assert'),
-    app = require('supertest')(svmp.config.get('enable_ssl') ? 'https://localhost:3000' : 'http://localhost:3000'),
+    app = require('supertest')(sam.config.get('enable_ssl') ? 'https://localhost:3000' : 'http://localhost:3000'),
 
     tokenHelper = require('../../lib/authentication').makeToken,
     expTime = Math.floor(require('to-date')(3600).seconds.fromNow/1000),
@@ -34,13 +34,13 @@ describe("Services", function () {
     describe("Authentication check", function() {
         it('should allow access with token and role of admin', function(done) {
             app.get('/services/users')
-                .set('svmp-authtoken',admin_token)
+                .set('sam-authtoken',admin_token)
                 .expect(200,done);
         });
 
         it('should should NOT allow access without admin role', function(done) {
             app.get('/services/users')
-                .set('svmp-authtoken',user_token)
+                .set('sam-authtoken',user_token)
                 .expect(401,done);
         });
     });
@@ -48,7 +48,7 @@ describe("Services", function () {
     describe("Users CRUD", function(){
         it('should list Users', function(done) {
             app.get('/services/users')
-                .set('svmp-authtoken',admin_token)
+                .set('sam-authtoken',admin_token)
                 .expect(function(res) {
                     assert.strictEqual(res.statusCode,200);
                     assert.ok(res.body.users);
@@ -58,7 +58,7 @@ describe("Services", function () {
 
         it('should get a User by username', function(done) {
             app.get('/services/user/bob')
-                .set('svmp-authtoken',admin_token)
+                .set('sam-authtoken',admin_token)
                 .expect(function(res) {
                     assert.strictEqual(res.statusCode,200);
                     assert.ok(res.body.user);
@@ -69,11 +69,11 @@ describe("Services", function () {
 
         it('should add a user', function(done) {
             app.post('/services/user')
-                .set('svmp-authtoken',admin_token)
+                .set('sam-authtoken',admin_token)
                 .send({user: {username: 'carl', password: 'carl12345678!A', email: 'carl@here.com', device_type: 'abc'}})
                 .expect(function(res) {
                     app.get('/services/users')
-                        .set('svmp-authtoken',admin_token)
+                        .set('sam-authtoken',admin_token)
                         .expect(function(res) {
                             assert.strictEqual(res.statusCode,200);
                             assert.ok(res.body.users);
@@ -85,7 +85,7 @@ describe("Services", function () {
 
         it('should fail to add a user when missing fields', function(done) {
             app.post('/services/user')
-                .set('svmp-authtoken',admin_token)
+                .set('sam-authtoken',admin_token)
                 .send({user: {username: 'carl', password: 'carl12345678!A',device_type: 'abc'}})
                 .expect(400,done);
 
@@ -93,11 +93,11 @@ describe("Services", function () {
 
         it('should delete a User', function(done){
             app.delete('/services/user/bob')
-                .set('svmp-authtoken',admin_token)
+                .set('sam-authtoken',admin_token)
                 .expect(function(res) {
                     assert.equal(res.statusCode, 200);
                     app.get('/services/users')
-                        .set('svmp-authtoken',admin_token)
+                        .set('sam-authtoken',admin_token)
                         .expect(function(res) {
                             assert.strictEqual(res.statusCode,200);
                             assert.ok(res.body.users);
@@ -109,12 +109,12 @@ describe("Services", function () {
 
         it('should update a User', function(done){
             app.put('/services/user/bob')
-                .set('svmp-authtoken',admin_token)
+                .set('sam-authtoken',admin_token)
                 .send({update: {email: 'bob1@there.com'}})
                 .expect(function(res) {
                     assert.equal(res.statusCode, 200);
                     app.get('/services/user/bob')
-                        .set('svmp-authtoken',admin_token)
+                        .set('sam-authtoken',admin_token)
                         .expect(function(res) {
                             assert.strictEqual(res.statusCode,200);
                             assert.strictEqual(res.body.user.email,'bob1@there.com');
@@ -127,28 +127,28 @@ describe("Services", function () {
     describe("VM Session Management", function(){
         it('should fail to add a new VM session when missing fields', function(done) {
             app.post('/services/vm-session')
-                .set('svmp-authtoken',admin_token)
+                .set('sam-authtoken',admin_token)
                 .send({username: 'dave'})
                 .expect(400, done);
         });
 
         it('should add a new VM session with correct fields', function(done) {
             app.post('/services/vm-session')
-                .set('svmp-authtoken',admin_token)
+                .set('sam-authtoken',admin_token)
                 .send({username: 'dave', expireAt: require('to-date')(6).hours.fromNow, connectTime: Date.now()})
                 .expect(200, done);
         });
 
         it('should fail to update a new VM session when missing fields', function(done) {
             app.put('/services/vm-session')
-                .set('svmp-authtoken',admin_token)
+                .set('sam-authtoken',admin_token)
                 .send({username: 'dave'})
                 .expect(400, done);
         });
 
         it('should update a new VM session with correct fields', function(done) {
             app.put('/services/vm-session')
-                .set('svmp-authtoken',admin_token)
+                .set('sam-authtoken',admin_token)
                 .send({username: 'dave', lastAction: new Date(), connectTime: Date.now()})
                 .expect(200, done);
         });
@@ -159,7 +159,7 @@ describe("Services", function () {
 
         it("should list devices", function(done){
             app.get('/services/cloud/devices')
-                .set('svmp-authtoken',admin_token)
+                .set('sam-authtoken',admin_token)
                 .expect(function(res){
                     assert.equal(res.statusCode, 200);
                     assert(typeof res.body === "object");
@@ -170,12 +170,12 @@ describe("Services", function () {
         /*
         it("should assign a volume to a given user", function(done){
             app.post('/services/cloud/assignvolume')
-                .set('svmp-authtoken',admin_token)
+                .set('sam-authtoken',admin_token)
                 .send({username: 'dave', volid: '1234'})
                 .expect(function(res) {
                     assert.equal(res.statusCode, 200);
                     app.get('/services/user/dave')
-                        .set('svmp-authtoken',admin_token)
+                        .set('sam-authtoken',admin_token)
                         .expect(function(res) {
                             assert.strictEqual(res.statusCode,200);
                             assert.strictEqual(res.body.user.volume_id,'1234');
@@ -185,7 +185,7 @@ describe("Services", function () {
 
         it('Should list volumes', function(done) {
             app.get('/services/cloud/volumes')
-                .set('svmp-authtoken',admin_token)
+                .set('sam-authtoken',admin_token)
                 .expect(function(res){
                     assert.equal(res.statusCode, 200);
                     console.log("LIST VOLS: ",res.body);
@@ -195,7 +195,7 @@ describe("Services", function () {
 
         it('Should list images', function(done) {
             app.get('/services/cloud/images')
-                .set('svmp-authtoken',admin_token)
+                .set('sam-authtoken',admin_token)
                 .expect(function(res){
                     assert.equal(res.statusCode, 200);
                     console.log("LIST IMAGES: ",res.body);
@@ -205,12 +205,12 @@ describe("Services", function () {
 
         it("Should create a Volume", function(done) {
             app.post('/services/cloud/volume/create')
-                .set('svmp-authtoken',admin_token)
+                .set('sam-authtoken',admin_token)
                 .send({username: 'dave'})
                 .expect(function(res) {
                     assert.equal(res.statusCode, 200);
                     app.get('/services/cloud/volumes')
-                        .set('svmp-authtoken',admin_token)
+                        .set('sam-authtoken',admin_token)
                         .expect(function(res) {
                             assert.strictEqual(res.statusCode,200);
                             console.log("Vols: ", res.body);

@@ -1,26 +1,7 @@
-/*
- * Copyright 2014 The MITRE Corporation, All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this work except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * author Dave Bryson
- *
- */
-
 'use strict';
 
 var
-    svmp = require('../../lib/svmp'),
+    sam = require('../../lib/sam'),
     auth = require('../../lib/authentication'),
     strategy = auth.loadStrategy(),
     toDate = require('to-date'),
@@ -43,7 +24,7 @@ exports.login = function(req,res) {
     res.logUsername = req.body.username;
 
     // check to see if this user account is currently locked
-    var error = svmp.lockout.checkForLock(req.body.username);
+    var error = sam.lockout.checkForLock(req.body.username);
     if (error) {
         res.logMessage = error;
         res.json(401,{msg: error});
@@ -55,7 +36,7 @@ exports.login = function(req,res) {
             res.logMessage = 'Invalid login credentials';
             res.json(errCode,{msg: 'Error authenticating'});
             // report a failed login attempt
-            svmp.lockout.failedAttempt(req.body.username);
+            sam.lockout.failedAttempt(req.body.username);
         } else {
             res.logMessage = 'Login successful';
             sendToken(res, result);
@@ -79,7 +60,7 @@ exports.changeUserPassword = function(req,res) {
         res.logMessage = 'Missing required fields';
         res.json(400, {msg: 'Missing required field(s)'});
     } else {
-        svmp.User.findOne({username: un}, function (err, user) {
+        sam.User.findOne({username: un}, function (err, user) {
             if (err) {
                 res.logMessage = 'Internal error';
                 res.json(500, {msg: 'Internal error'});
@@ -123,12 +104,12 @@ function sendToken(res, result) {
         max_session = (new Date(result.exp).getTime() - new Date().getTime()) / 1000;
     } else {
         // the client authenticated some other way; make a new token
-        max_session = svmp.config.get('max_session_length');
+        max_session = sam.config.get('max_session_length');
         var args = {
             'sub': result.user.username,
             'role': result.user.roles[0],
             'exp': Math.floor(toDate(max_session).seconds.fromNow / 1000),
-            //'iss': svmp.config.get('rest_server_url'),
+            //'iss': sam.config.get('rest_server_url'),
             'jti': uuid.v4()
         };
         token = auth.makeToken(args);
@@ -141,10 +122,10 @@ function sendToken(res, result) {
             maxLength: max_session
         },
         server: {
-            host: svmp.config.get('proxy_host'),
-            port: svmp.config.get('proxy_port')
+            host: sam.config.get('proxy_host'),
+            port: sam.config.get('proxy_port')
         },
-        webrtc: svmp.config.get("webrtc")
+        webrtc: sam.config.get("webrtc")
     };
 
     res.json(200,responseObj);

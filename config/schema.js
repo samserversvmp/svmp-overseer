@@ -119,7 +119,7 @@ module.exports = {
             "type": "boolean"
         },
         "pam_service": {
-            "default": "svmp",
+            "default": "sam",
             "type": "string"
         },
 
@@ -136,7 +136,7 @@ module.exports = {
             "type": "number"
         },
 
-        // svmp-server settings
+        // sam-server settings
         "proxy_host": {
             "required": true,
             "type": "string"

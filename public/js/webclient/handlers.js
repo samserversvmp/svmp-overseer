@@ -48,12 +48,12 @@ function repeatUpdateLocation(pbuf, provider, timeout) {
 
 function handleResponse(resp, socket, pbuf) {
     if (resp.type === pbuf.Response.ResponseType.ERROR) {
-        window.svmpState = "error";
+        window.samState = "error";
         alert("Error received!");
         return;
     }
 
-    switch(window.svmpState) {
+    switch(window.samState) {
         case "connected":
             // we are waiting for either VMREADY or AUTH_FAIL
             handleResponseConnected(resp, socket, pbuf);
@@ -70,13 +70,13 @@ function handleResponseConnected(resp, socket, pbuf) {
         case pbuf.Response.ResponseType.AUTH:
             // we received an AUTH_FAIL
             alert("Auth failed! Please re-enter your credentials.");
-            $.removeCookie("svmpData", {path: '/'});
+            $.removeCookie("samData", {path: '/'});
             window.location.replace("/webclient");
             break;
         case pbuf.Response.ResponseType.VMREADY:
             console.log("Received VMREADY");
-            window.svmpState = "running";
-            console.log('SVMP state: "connected" -> "running"');
+            window.samState = "running";
+            console.log('sam state: "connected" -> "running"');
 
             // send initial Request messages...
             sendInitRequests(socket, pbuf);
@@ -130,7 +130,7 @@ function sendInitRequests(socket, pbuf) {
 }
 
 function setupWebRTC(socket, pbuf) {
-    // FIXME: looks like we don't do anything with the WebRTC info we received (window.svmpData.webrtc)
+    // FIXME: looks like we don't do anything with the WebRTC info we received (window.samData.webrtc)
 //    console.log("Received VIDSTREAMINFO:\niceServers: " + resp.videoInfo.iceServers + "\npcConstraints: " + resp.videoInfo.pcConstraints + "\nvideoConstraints: " + resp.videoInfo.videoConstraints);
 
     // FIXME: looks like these gets created and nothing happens to them afterwards?
@@ -139,10 +139,10 @@ function setupWebRTC(socket, pbuf) {
 
     // FIXME: create an offer...? https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection
     window.rtcpeer = RTCPeerConnection({
-        iceServers: window.svmpData.webrtc.ice_servers,
+        iceServers: window.samData.webrtc.ice_servers,
         attachStream     : null,
         onICE            : function(candidate) {
-            // convert fields to those that svmpd expects to see
+            // convert fields to those that samd expects to see
             var obj = {
                 type: "candidate",
                 id: candidate.sdpMid,

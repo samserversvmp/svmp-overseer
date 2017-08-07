@@ -2,7 +2,7 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 
 <head>
-    <title>SVMP Webclient</title>
+    <title>sam Webclient</title>
 
     <!-- General META -->
     <meta charset="utf-8">
@@ -89,13 +89,13 @@
 
     // look for session cookie, redirect if necessary
     $.cookie.json = true; // turns on automatic JSON parsing for jquery.cookie
-    var data = $.cookie("svmpData");
+    var data = $.cookie("samData");
     if (data) {
         window.location.replace(videoUrl);
     }
 
     // populate inputs if necessary
-    var remembered = $.cookie("svmpRemember");
+    var remembered = $.cookie("samRemember");
     if (remembered) {
         // we found a cookie that told us to remember a username;
         $("#username").val(remembered);

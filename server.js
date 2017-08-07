@@ -1,7 +1,7 @@
 'use strict';
 
 var
-    sam = require('./lib/svmp'),
+    sam = require('./lib/sam'),
     config = require('./lib/config'),
     path = require('path'),
     vmManager = require('./lib/cloud/vm-manager');

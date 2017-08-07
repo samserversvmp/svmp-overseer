@@ -25,7 +25,7 @@ module.exports = function (grunt) {
     grunt.registerTask('create-admin-service-token', 'Make Token', function (username) {
         var
             fs = require('fs'),
-            svmp = require('./lib/svmp'),
+            sam = require('./lib/sam'),
             shell = require('shelljs'),
             jwt = require('jsonwebtoken');
 
@@ -35,27 +35,27 @@ module.exports = function (grunt) {
             return;
         }
 
-        svmp.init();
-        var pass = svmp.config.get('private_key_pass');
-        var file = svmp.config.get('private_key');
+        sam.init();
+        var pass = sam.config.get('private_key_pass');
+        var file = sam.config.get('private_key');
         process.env.passphrase = pass;
         var command = 'openssl rsa -in ' + file + ' -passin env:passphrase';
         var privKey = shell.exec(command, {silent: true}).output;
         delete process.env.passphrase;
 
         console.log("Create token for: ", username);
-        var token = jwt.sign({sub: username, role: 'admin'}, privKey, {algorithm: svmp.config.get('jwt_signing_alg')});
+        var token = jwt.sign({sub: username, role: 'admin'}, privKey, {algorithm: sam.config.get('jwt_signing_alg')});
         console.log(token);
     });
 
     grunt.registerTask('add-default-admin', 'add default admin account to the database', function () {
         var
-            svmp = require('./lib/svmp'),
+            sam = require('./lib/sam'),
             done = this.async();
 
-        svmp.init();
+        sam.init();
 
-        svmp.User.find({username: 'mitre', roles: 'admin'}, function (err, admins) {
+        sam.User.find({username: 'mitre', roles: 'admin'}, function (err, admins) {
             if (admins && admins.length === 0) {
                 var default_admin = {
                     username: 'mitre',
@@ -64,20 +64,20 @@ module.exports = function (grunt) {
                     approved: true,
                     roles: ['admin']
                 };
-                svmp.User.create(default_admin, function (err, r) {
+                sam.User.create(default_admin, function (err, r) {
                     if (err) {
                         console.log(err);
-                        svmp.shutdown();
+                        sam.shutdown();
                         done();
                     } else {
                         console.log('Created user: ', default_admin);
-                        svmp.shutdown();
+                        sam.shutdown();
                         done();
                     }
                 });
             } else {
                 console.log('Default admin already exists!');
-                svmp.shutdown();
+                sam.shutdown();
                 done();
             }
         });
@@ -85,33 +85,33 @@ module.exports = function (grunt) {
 
     grunt.registerTask('remove-default-admin', 'remove default admin account from the database', function () {
         var
-            svmp = require('./lib/svmp'),
+            sam = require('./lib/sam'),
             done = this.async();
 
-        svmp.init();
+        sam.init();
 
-        svmp.User.findOne({username: 'mitre'}, function (err, defaultAdmin) {
+        sam.User.findOne({username: 'mitre'}, function (err, defaultAdmin) {
             if (err) {
                 console.log(err);
-                svmp.shutdown();
+                sam.shutdown();
                 done();
             } else {
                 if (defaultAdmin) {
                     defaultAdmin.remove(function (errR, result) {
                         if (errR) {
                             console.log(errR);
-                            svmp.shutdown();
+                            sam.shutdown();
                             done();
                         } else {
                             console.log('Remove default admin: ', result);
-                            svmp.shutdown();
+                            sam.shutdown();
                             done();
                         }
                     });
 
                 } else {
                     console.log('Default admin account does not exist');
-                    svmp.shutdown();
+                    sam.shutdown();
                     done();
                 }
             }

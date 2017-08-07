@@ -13,8 +13,8 @@
     "postinstall": "bower install --config.interactive=false --allow-root"
   },
   "bin": {
-    "svmp-overseer": "./server.js",
-    "svmp-create-token": "./create-token.js"
+    "sam-overseer": "./server.js",
+    "sam-create-token": "./create-token.js"
   },
   "dependencies": {
     "aws-sdk": "~2.0.8",
@@ -40,7 +40,7 @@
     "nodemailer": "~0.7.0",
     "passport": "~0.2.0",
     "passport-local": "~1.0.0",
-    "pkgcloud": "git+https://github.com/SVMP/pkgcloud.git#0.9.4-svmp",
+    "pkgcloud": "git+https://github.com/sam/pkgcloud.git#0.9.4-sam",
     "q": "~1.0.1",
     "revalidator": "^0.2.0",
     "shelljs": "^0.3.0",

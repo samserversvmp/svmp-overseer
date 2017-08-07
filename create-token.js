@@ -1,6 +1,6 @@
 'use strict';
 
-var sam = require('./lib/svmp'),
+var sam = require('./lib/sam'),
     shell = require('shelljs'),
     ms = require('ms'),
     uuid = require('node-uuid'),

@@ -1,26 +1,7 @@
-/*
- * Copyright 2013-2014 The MITRE Corporation, All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this work except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * author Dave Bryson, Joe Portner
- *
- */
-
 'use strict';
 
 var
-    svmp = require('../../lib/svmp'),
+    sam = require('../../lib/sam'),
     toDate = require('to-date');
 
 // CREATE
@@ -50,7 +31,7 @@ exports.createSession  = function(req,res){
 
     try {
         // if a VM session already exists for this user, overwrite it
-        svmp.VMSession.findOneAndUpdate(conditions, update, options, function (err, sess) {
+        sam.VMSession.findOneAndUpdate(conditions, update, options, function (err, sess) {
             if (err) {
                 res.json(500, {msg:'Error creating the session' });
             } else {
@@ -86,7 +67,7 @@ exports.updateSession = function (req, res) {
     };
 
     try {
-        svmp.VMSession.update(query, update, function (err) {
+        sam.VMSession.update(query, update, function (err) {
             if (err) {
                 res.json(500, {msg:'Error updating the session'});
             } else {

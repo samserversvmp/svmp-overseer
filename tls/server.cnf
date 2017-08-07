@@ -9,10 +9,10 @@ prompt                 = no
 C                      = US
 ST                     = VA
 L                      = Mclean
-O                      = SVMP Test Co
-OU                     = SVMP Test Co
+O                      = sam Test Co
+OU                     = sam Test Co
 CN                     = localhost
-emailAddress           = test@svmp.localdomain
+emailAddress           = test@sam.localdomain
 
 [ req_attributes ]
 challengePassword              = A challenge password
