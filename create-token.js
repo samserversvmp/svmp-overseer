@@ -1,6 +1,6 @@
 'use strict';
 
-var svmp = require('./lib/svmp'),
+var sam = require('./lib/svmp'),
     shell = require('shelljs'),
     ms = require('ms'),
     uuid = require('node-uuid'),
@@ -24,9 +24,9 @@ if (commander.args.length !== 1) {
 
 var username = commander.args[0];
 
-svmp.init();
-var pass = svmp.config.get('private_key_pass');
-var file = svmp.config.get('private_key');
+sam.init();
+var pass = sam.config.get('private_key_pass');
+var file = sam.config.get('private_key');
 process.env.passphrase = pass;
 var command = 'openssl rsa -in ' + file + ' -passin env:passphrase';
 var privKey = shell.exec(command, {silent: true}).output;
@@ -41,7 +41,7 @@ if (commander.admin) options.role = 'admin';
 if (commander.expires) options.exp = Math.floor((Date.now() + ms(commander.expires)) / 1000);
 
 console.log("Creating token: ", JSON.stringify(options));
-var token = jwt.sign(options, privKey, {algorithm: svmp.config.get('jwt_signing_alg')});
+var token = jwt.sign(options, privKey, {algorithm: sam.config.get('jwt_signing_alg')});
 console.log(token);
 
 process.exit();

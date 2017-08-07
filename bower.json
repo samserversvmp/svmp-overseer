@@ -1,7 +1,7 @@
 {
-  "name": "svmp-overseer-console",
+  "name": "sam-overseer-console",
   "version": "0.0.1",
-  "description": "Web console for SVMP",
+  "description": "Web console for SAM",
   "dependencies": {
     "bootstrap": "~3",
     "angular": "~1.2",
