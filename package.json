@@ -40,7 +40,7 @@
     "nodemailer": "~0.7.0",
     "passport": "~0.2.0",
     "passport-local": "~1.0.0",
-    "pkgcloud": "git+https://github.com/sam/pkgcloud.git#0.9.4-sam",
+    "pkgcloud": "git+https://github.com/svmp/pkgcloud.git#0.9.4-svmp",
     "q": "~1.0.1",
     "revalidator": "^0.2.0",
     "shelljs": "^0.3.0",
